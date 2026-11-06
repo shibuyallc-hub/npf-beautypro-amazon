@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>ビューティープロ Amazon広告 効果ダッシュボード</title>
+<style>
+  :root{
+    --bg:#f4f2ee; --panel:#ffffff; --ink:#1d2433; --muted:#6b7280; --line:#e5e1d8;
+    --accent:#1f4e78; --accent-soft:#e6eef6; --warm:#c8590b; --est:#9aa7b6; --good:#2f7d5b; --bad:#b42318;
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic",Meiryo,sans-serif;
+    font-size:14px;line-height:1.6}
+  .wrap{max-width:1120px;margin:0 auto;padding:20px 16px 48px}
+  header h1{margin:0;font-size:22px;letter-spacing:.02em}
+  header p{margin:4px 0 0;color:var(--muted);font-size:13px}
+  .bar{position:sticky;top:0;z-index:5;background:var(--bg);padding:14px 0 10px;margin-top:6px;
+    display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;border-bottom:1px solid var(--line)}
+  .seg{display:inline-flex;background:#e9e5dc;border-radius:999px;padding:3px;flex-wrap:wrap}
+  .seg button{border:0;background:transparent;padding:7px 18px;border-radius:999px;font:inherit;font-weight:600;color:var(--muted);cursor:pointer}
+  .seg button.on{background:var(--accent);color:#fff}
+  .ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  select,input[type=date]{font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+  button.reset{font:inherit;padding:7px 14px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--muted);cursor:pointer}
+  .updated{margin-left:auto;color:var(--muted);font-size:12px}
+  nav.tabs{display:flex;gap:4px;margin:16px 0 14px;border-bottom:2px solid var(--line);flex-wrap:wrap}
+  nav.tabs button{border:0;background:transparent;font:inherit;font-weight:600;color:var(--muted);padding:10px 18px;cursor:pointer;
+    border-bottom:3px solid transparent;margin-bottom:-2px}
+  nav.tabs button.on{color:var(--accent);border-bottom-color:var(--accent)}
+  .panel{display:none}.panel.on{display:block}
+  .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .cards + .cards{margin-top:12px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px}
+  .card .lb{color:var(--muted);font-size:12px;font-weight:600}
+  .card .v{font-size:28px;font-weight:700;margin:4px 0 2px;letter-spacing:.01em;font-variant-numeric:tabular-nums}
+  .card .sub{color:var(--muted);font-size:12px}
+  .card.accent{background:var(--accent);border-color:var(--accent);color:#fff}
+  .card.accent .lb,.card.accent .sub{color:#d3e0ee}
+  .box{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;margin-top:12px}
+  h2{margin:0 0 10px;font-size:15px}
+  h2 small{font-weight:400;color:var(--muted);margin-left:8px;font-size:12px}
+  table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+  th,td{padding:8px 7px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+  th{color:var(--muted);font-weight:600;font-size:12px;background:#faf8f4;white-space:normal;line-height:1.35}
+  th:first-child,td:first-child{text-align:left}
+  td.l,th.l{text-align:left}
+  th.sortable{cursor:pointer;user-select:none;white-space:nowrap}
+  th.sortable:hover{color:var(--accent)}
+  th.sortable .ar{display:inline-block;width:1em;color:var(--muted);font-size:.8em;margin-left:2px}
+  th.sortable.on{color:var(--accent)}
+  th.sortable.on .ar{color:var(--accent)}
+  tr.tot td{font-weight:700;background:var(--accent-soft)}
+  .scroll{overflow-x:auto}
+  .badge{display:inline-block;font-size:10.5px;font-weight:700;padding:1px 7px;border-radius:999px;margin-left:6px;vertical-align:1px}
+  .b-sb{background:#e6eef6;color:#1f4e78}
+  .b-sp{background:#fdebd9;color:#a64a08}
+  .b-part{background:#fdebd9;color:#a64a08}
+  .b-ok{background:#e1f2ea;color:#1f6b49}
+  .b-ng{background:#fde4e1;color:#b42318}
+  .b-buy{background:#e1f2ea;color:#1f6b49}
+  .note{color:var(--muted);font-size:12px;margin-top:10px}
+  .notes{margin:16px 0 0;padding-left:18px;color:var(--muted);font-size:12px}
+  svg text{font-family:inherit}
+  .lg{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin:2px 0 6px}
+  .lg i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-2px}
+  .lg i.ln{height:3px;margin-top:5px;vertical-align:middle;border-radius:2px}
+  .lg i.ring{width:9px;height:9px;border-radius:50%;background:#fff;border:2px solid #6b7280;vertical-align:-1px}
+  .login{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:50;padding:16px}
+  .login form{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:28px 26px;width:100%;max-width:360px;box-shadow:0 8px 30px rgba(29,36,51,.08)}
+  .login h1{margin:0 0 4px;font-size:18px}
+  .login p{margin:0 0 16px;color:var(--muted);font-size:12.5px}
+  .login input{width:100%;font:inherit;padding:11px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:10px}
+  .login button{width:100%;font:inherit;font-weight:700;padding:11px;border:0;border-radius:10px;background:var(--accent);color:#fff;cursor:pointer}
+  .login button[disabled]{opacity:.6;cursor:wait}
+  .login .err{color:#b42318;font-size:12.5px;min-height:18px;margin:2px 0 8px}
+  .hidden{display:none!important}
+  @media (max-width:820px){
+    .cards{grid-template-columns:repeat(2,1fr)}
+    .updated{margin-left:0;width:100%}
+    .card .v{font-size:24px}
+    .seg button{padding:7px 12px}
+  }
+</style>
+</head>
+<body>
+<div class="login" id="login">
+  <form id="loginForm" autocomplete="off">
+    <h1>ビューティープロ Amazon広告 効果ダッシュボード</h1>
+    <p>パスワードを入力してください。</p>
+    <input type="password" id="pw" placeholder="パスワード" autofocus autocomplete="current-password">
+    <div class="err" id="loginErr"></div>
+    <button type="submit" id="loginBtn">開く</button>
+  </form>
+</div>
+<div class="wrap hidden" id="app">
+  <header>
+    <h1>ビューティープロ Amazon広告 効果ダッシュボード</h1>
+    <p>スポンサーブランド広告（SB）・スポンサープロダクト広告（SP）｜日本ペットフード</p>
+  </header>
+
+  <div class="bar">
+    <div class="seg" id="seg">
+      <button data-sp="all" class="on">全体</button>
+      <button data-sp="dog">ドッグ（SB）</button>
+      <button data-sp="cat">キャット（SB）</button>
+      <button data-sp="vita">ビタワン（SP）</button>
+    </div>
+    <div class="ctl" id="rangeCtl">
+      <select id="preset" aria-label="期間">
+        <option value="all">全期間</option>
+        <option value="last7">直近7日</option>
+        <option value="last14">直近14日</option>
+        <option value="thisweek">今週（月〜）</option>
+        <option value="lastweek">先週（月〜日）</option>
+        <option value="custom">期間を指定</option>
+      </select>
+      <input type="date" id="from" aria-label="開始日"><span style="color:var(--muted)">〜</span><input type="date" id="to" aria-label="終了日">
+      <button class="reset" id="reset">リセット</button>
+    </div>
+    <div class="updated" id="updated"></div>
+  </div>
+
+  <nav class="tabs" id="tabs">
+    <button data-tab="summary" class="on">サマリー</button>
+    <button data-tab="daily">日別推移</button>
+    <button data-tab="terms">キーワード別</button>
+  </nav>
+
+  <section class="panel on" id="p-summary">
+    <div class="cards" id="cards1"></div>
+    <div class="cards" id="cards2"></div>
+    <div class="box">
+      <h2>キャンペーン別<small id="campNote"></small></h2>
+      <div class="scroll"><table id="campTable"></table></div>
+    </div>
+    <ul class="notes" id="summaryNotes"></ul>
+  </section>
+
+  <section class="panel" id="p-daily">
+    <div class="box" style="margin-top:0">
+      <h2>費用と売上の日別推移</h2>
+      <div class="lg"><span><i style="background:var(--accent)"></i>費用</span><span><i style="background:var(--est)"></i>費用（途中の日）</span><span><i class="ln" style="background:var(--warm)"></i>売上</span></div>
+      <div id="dailyChart"></div>
+    </div>
+    <div class="box">
+      <h2>キャンペーン別の日別推移 <select id="metricSel" style="margin-left:8px">
+        <option value="sp">費用</option><option value="sl">売上</option><option value="od">注文数</option><option value="roas">ROAS</option><option value="cl">クリック数</option><option value="im">インプレッション</option>
+      </select></h2>
+      <div class="lg" id="campLegend"></div>
+      <div id="campTrend"></div>
+    </div>
+    <div class="box">
+      <h2>日別の数値</h2>
+      <div class="scroll"><table id="dailyTable"></table></div>
+    </div>
+    <ul class="notes" id="dailyNotes"></ul>
+  </section>
+
+  <section class="panel" id="p-terms">
+    <div class="box" style="margin-top:0">
+      <h2>キーワード別の効果<small id="kwNote"></small></h2>
+      <div class="scroll"><table id="kwTable"></table></div>
+      <div class="note" id="kwFoot"></div>
+    </div>
+    <div class="box" id="termBox">
+      <h2>検索語句（実際にクリックされた語）<small id="termNote"></small></h2>
+      <div class="scroll"><table id="termTable"></table></div>
+      <div class="note">ユーザーが実際に入力した語のうち、クリックされたものです（SBは、管理画面にクリックされた語だけが表示されます）。期間の選択には連動しません（配信開始からの累計）。</div>
+    </div>
+  </section>
+</div>
+
+<script src="data/data.enc.js"></script>
+<script>
+window.startApp = function(D){
+  const $ = s => document.querySelector(s);
+  const yen = n => (n==null||isNaN(n)) ? "-" : "¥" + Math.round(n).toLocaleString("ja-JP");
+  const num = n => (n==null||isNaN(n)) ? "-" : Math.round(n).toLocaleString("ja-JP");
+  const pct = (n,d=1) => (n==null||isNaN(n)) ? "-" : (n*100).toFixed(d) + "%";
+  const x2 = n => (n==null||isNaN(n)) ? "-" : n.toFixed(2);
+  const md = iso => { const [y,m,d] = iso.split("-"); return (+m) + "/" + (+d); };
+  const toDate = iso => new Date(iso + "T00:00:00");
+  const iso = dt => dt.getFullYear() + "-" + String(dt.getMonth()+1).padStart(2,"0") + "-" + String(dt.getDate()).padStart(2,"0");
+  const addDays = (s,n) => { const d = toDate(s); d.setDate(d.getDate()+n); return iso(d); };
+  const sum = (a,f) => a.reduce((t,r)=>t+(f(r)||0),0);
+  const safeDiv = (a,b) => (b? a/b : null);
+  const esc = s => String(s).replace(/[&<>"]/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+  const CK = ["dog","cat","vita"];
+  const COLORS = {dog:"#1f4e78", cat:"#c8590b", vita:"#2f7d5b"};
+  const st = { sp:"all", tab:"summary", from:null, to:null, preset:"all", metric:"sp", kwSort:{key:"sp",dir:-1} };
+  const keys = () => st.sp==="all" ? CK : [st.sp];
+  const camp = k => D.campaigns[k];
+  const label = k => camp(k).kpi.name + "（" + camp(k).kpi.type + "）";
+  const badge = k => `<span class="badge ${camp(k).kpi.type==="SB"?"b-sb":"b-sp"}">${camp(k).kpi.type}</span>`;
+  const minDate = () => keys().reduce((m,k)=>camp(k).daily.reduce((mm,r)=>r.d<mm?r.d:mm,m), "9999-99-99");
+  const maxDate = () => D.latest_date;
+  const inRange = r => r.d>=st.from && r.d<=st.to;
+  const rowsOf = k => camp(k).daily.filter(inRange);
+  const allRows = () => keys().flatMap(k=>rowsOf(k));
+  const agg = rows => ({ sp:sum(rows,r=>r.sp), im:sum(rows,r=>r.im), cl:sum(rows,r=>r.cl), od:sum(rows,r=>r.od), sl:sum(rows,r=>r.sl), no:sum(rows,r=>r.no), ns:sum(rows,r=>r.ns), dpv:sum(rows,r=>r.dpv) });
+  const ctr = a => safeDiv(a.cl,a.im), cpc = a => safeDiv(a.sp,a.cl), acos = a => a.sl?a.sp/a.sl:null, roas = a => a.sp?a.sl/a.sp:null;
+
+  function setPreset(p){
+    st.preset = p; const mn = minDate(), mx = maxDate();
+    if(p==="all"){ st.from=mn; st.to=mx; }
+    else if(p==="last7"){ st.to=mx; st.from=addDays(mx,-6); }
+    else if(p==="last14"){ st.to=mx; st.from=addDays(mx,-13); }
+    else if(p==="thisweek"){ const d=toDate(mx); const back=(d.getDay()+6)%7; st.from=addDays(mx,-back); st.to=mx; }
+    else if(p==="lastweek"){ const d=toDate(mx); const back=(d.getDay()+6)%7; const thisMon=addDays(mx,-back); st.from=addDays(thisMon,-7); st.to=addDays(thisMon,-1); }
+    if(st.from<mn) st.from=mn;
+    if(st.from>st.to) st.from=st.to;
+    syncInputs();
+  }
+  function syncInputs(){ $("#preset").value=st.preset; $("#from").value=st.from; $("#to").value=st.to; $("#from").min=minDate(); $("#to").max=maxDate(); }
+
+  // ---------- SVG charts ----------
+  function niceMax(v){ if(v<=0) return 1; const p=Math.pow(10,Math.floor(Math.log10(v))); const f=v/p; const n=f<=1?1:f<=2?2:f<=5?5:10; return n*p; }
+  function combo(el, o){
+    const W=760,H=300,L=64,R=64,T=16,B=44, iw=W-L-R, ih=H-T-B, n=o.labels.length;
+    const bmax=niceMax(Math.max(...o.bars.map(v=>v||0),0)), lvals=o.line.filter(v=>v!=null);
+    const lmax=niceMax(Math.max(...lvals,0));
+    const bw=Math.max(2,Math.min(38,iw/n*.62)), x=i=>L+iw*(i+.5)/n;
+    let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img">`;
+    for(let k=0;k<=4;k++){
+      const y=T+ih*(1-k/4);
+      s+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="#e5e1d8"/>`;
+      s+=`<text x="${L-8}" y="${y+4}" text-anchor="end" font-size="11" fill="#6b7280">${o.barFmt(bmax*k/4)}</text>`;
+      s+=`<text x="${W-R+8}" y="${y+4}" font-size="11" fill="#c8590b">${o.lineFmt(lmax*k/4)}</text>`;
+    }
+    o.bars.forEach((v,i)=>{
+      if(v==null) return;
+      const h=ih*v/bmax, y=T+ih-h;
+      s+=`<rect x="${x(i)-bw/2}" y="${y}" width="${bw}" height="${Math.max(h,0)}" rx="2" fill="${o.barEst[i]?'#9aa7b6':'#1f4e78'}"><title>${o.labels[i]}｜${o.barName} ${o.barFmt(v)}${o.line[i]!=null?'｜'+o.lineName+' '+o.lineFmt(o.line[i]):''}</title></rect>`;
+    });
+    const pts=[]; o.line.forEach((v,i)=>{ if(v!=null) pts.push([x(i),T+ih*(1-v/lmax),i,v]); });
+    const segs=[]; let seg=[];
+    pts.forEach(p=>{ if(seg.length && p[2]-seg[seg.length-1][2]>1){ segs.push(seg); seg=[]; } seg.push(p); });
+    if(seg.length) segs.push(seg);
+    segs.forEach(sg=>{ if(sg.length>1) s+=`<polyline fill="none" stroke="#c8590b" stroke-width="2" points="${sg.map(p=>p[0]+','+p[1]).join(' ')}"/>`; });
+    pts.forEach(p=>{ s+=`<circle cx="${p[0]}" cy="${p[1]}" r="3.4" fill="#fff" stroke="#c8590b" stroke-width="2"><title>${o.labels[p[2]]}｜${o.lineName} ${o.lineFmt(p[3])}</title></circle>`; });
+    const step=Math.ceil(n/12);
+    o.labels.forEach((lb,i)=>{ if(i%step===0 || i===n-1) s+=`<text x="${x(i)}" y="${H-B+18}" text-anchor="middle" font-size="11" fill="#6b7280">${lb}</text>`; });
+    s+=`</svg>`; el.innerHTML=s;
+  }
+  function lineChart(el, o){
+    const W=760,H=300,L=64,R=24,T=16,B=44, iw=W-L-R, ih=H-T-B, n=o.labels.length;
+    const all=o.series.flatMap(s=>s.vals.filter(v=>v!=null)), mx=Math.max(...all,0);
+    const nice=v=>{ if(v<=0) return 1; const p=Math.pow(10,Math.floor(Math.log10(v))), f=v/p; return [1,1.2,1.5,2,2.5,3,4,5,6,8,10].find(t=>f<=t)*p; };
+    const vmax=o.int ? Math.max(4,Math.ceil(mx/4)*4) : nice(mx), x=i=>L+iw*(i+.5)/n;
+    let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img">`;
+    for(let k=0;k<=4;k++){
+      const y=T+ih*(1-k/4);
+      s+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="#e5e1d8"/><text x="${L-8}" y="${y+4}" text-anchor="end" font-size="11" fill="#6b7280">${o.fmt(vmax*k/4)}</text>`;
+    }
+    o.series.forEach(sr=>{
+      const pts=[]; sr.vals.forEach((v,i)=>{ if(v!=null) pts.push([x(i),T+ih*(1-v/vmax),i,v,sr.est[i]]); });
+      const segs=[]; let seg=[];
+      pts.forEach(p=>{ if(seg.length && p[2]-seg[seg.length-1][2]>1){ segs.push(seg); seg=[]; } seg.push(p); });
+      if(seg.length) segs.push(seg);
+      segs.forEach(sg=>{ if(sg.length>1) s+=`<polyline fill="none" stroke="${sr.color}" stroke-width="2" points="${sg.map(p=>p[0]+','+p[1]).join(' ')}"/>`; });
+      pts.forEach(p=>{ s+=`<circle cx="${p[0]}" cy="${p[1]}" r="3.4" fill="${p[4]?'#fff':sr.color}" stroke="${sr.color}" stroke-width="2"><title>${o.labels[p[2]]}｜${sr.name} ${o.fmt(p[3])}${p[4]?'（途中）':''}</title></circle>`; });
+    });
+    const step=Math.ceil(n/12);
+    o.labels.forEach((lb,i)=>{ if(i%step===0 || i===n-1) s+=`<text x="${x(i)}" y="${H-B+18}" text-anchor="middle" font-size="11" fill="#6b7280">${lb}</text>`; });
+    s+=`</svg>`; el.innerHTML=s;
+  }
+
+  // ---------- Summary ----------
+  function renderSummary(){
+    const rows=allRows(), a=agg(rows);
+    const cumTotal=agg(keys().flatMap(k=>camp(k).daily));
+    const budget=sum(keys(), k=>camp(k).kpi.budget);
+    const days=new Set(rows.filter(r=>r.sp>0).map(r=>r.d)).size;
+    const partial = D.partial_date && st.to>=D.partial_date && st.from<=D.partial_date;
+    $("#cards1").innerHTML = [
+      `<div class="card accent"><div class="lb">費用（選択期間）</div><div class="v">${yen(a.sp)}</div><div class="sub">${md(st.from)}〜${md(st.to)}｜配信${days}日</div></div>`,
+      `<div class="card"><div class="lb">売上</div><div class="v">${yen(a.sl)}</div><div class="sub">広告経由の購入${partial?'｜最新日は途中':''}</div></div>`,
+      `<div class="card"><div class="lb">ROAS（売上 ÷ 費用）</div><div class="v">${x2(roas(a))}</div><div class="sub">1.00を超えると費用を売上が上回る</div></div>`,
+      `<div class="card"><div class="lb">注文数</div><div class="v">${num(a.od)}</div><div class="sub">広告経由の購入件数</div></div>`
+    ].join("");
+    $("#cards2").innerHTML = [
+      `<div class="card"><div class="lb">ACOS（費用 ÷ 売上）</div><div class="v">${pct(acos(a))}</div><div class="sub">低いほど効率がよい</div></div>`,
+      `<div class="card"><div class="lb">CPC（クリック単価）</div><div class="v">${yen(cpc(a))}</div><div class="sub">クリック ${num(a.cl)}件</div></div>`,
+      `<div class="card"><div class="lb">CTR</div><div class="v">${pct(ctr(a),2)}</div><div class="sub">インプレッション ${num(a.im)}</div></div>`,
+      `<div class="card"><div class="lb">予算消化率（${D.budget.label}）</div><div class="v">${pct(safeDiv(cumTotal.sp,budget))}</div><div class="sub">${yen(cumTotal.sp)} / ${yen(budget)}（${keys().length>1?'3キャンペーン合計':'月予算'}）</div></div>`
+    ].join("");
+
+    let h=`<tr><th class="l">キャンペーン</th><th>費用</th><th>予算消化率<br>（累計）</th><th>インプレッション</th><th>クリック数</th><th>CTR</th><th>CPC</th><th>注文数</th><th>売上</th><th>ACOS</th><th>ROAS</th><th>新規顧客<br>の注文数</th></tr>`;
+    keys().forEach(k=>{ const r=agg(rowsOf(k)), c=agg(camp(k).daily);
+      h+=`<tr><td class="l">${camp(k).kpi.name}${badge(k)}</td><td>${yen(r.sp)}</td><td>${pct(safeDiv(c.sp,camp(k).kpi.budget))}</td><td>${num(r.im)}</td><td>${num(r.cl)}</td><td>${pct(ctr(r),2)}</td><td>${yen(cpc(r))}</td><td>${num(r.od)}</td><td>${yen(r.sl)}</td><td>${pct(acos(r))}</td><td>${x2(roas(r))}</td><td>${num(r.no)}</td></tr>`; });
+    if(keys().length>1) h+=`<tr class="tot"><td class="l">合計</td><td>${yen(a.sp)}</td><td>${pct(safeDiv(cumTotal.sp,budget))}</td><td>${num(a.im)}</td><td>${num(a.cl)}</td><td>${pct(ctr(a),2)}</td><td>${yen(cpc(a))}</td><td>${num(a.od)}</td><td>${yen(a.sl)}</td><td>${pct(acos(a))}</td><td>${x2(roas(a))}</td><td>${num(a.no)}</td></tr>`;
+    $("#campTable").innerHTML=h; $("#campNote").textContent=md(st.from)+"〜"+md(st.to);
+
+    $("#summaryNotes").innerHTML=[
+      "売上・注文数は、広告をクリックした後の購入です。SB（ブランドスポンサー）は14日間、SP（スポンサープロダクト）は7日間が対象のため、SBとSPの売上・ROASはそのまま比べられません。",
+      "SBの売上には、広告の商品だけでなく、同じブランドの他の商品の購入も含まれます。",
+      "管理画面の数字は半日〜1日遅れて確定します。最新日は途中の値で、後から増えることがあります。",
+      "Meta（Instagram）広告の購入件数・CPAとは計測の基準が違うため、直接は比べません。",
+      `予算消化率は、1キャンペーン（ドッグ・キャット・ビタワン）あたりの月予算 ${yen(D.budget.per_campaign)}（${D.budget.label}）に対する、配信開始からの費用の累計です。3キャンペーン合計の予算は ${yen(D.budget.per_campaign*3)} です。`
+    ].map(t=>`<li>${t}</li>`).join("");
+  }
+
+  // ---------- Daily ----------
+  const METRICS = {
+    sp:{fmt:yen}, sl:{fmt:yen}, od:{fmt:num,int:true}, roas:{fmt:x2}, cl:{fmt:num,int:true}, im:{fmt:num}
+  };
+  function renderDaily(){
+    $("#metricSel").value=st.metric;
+    const days=[]; for(let d=st.from; d<=st.to; d=addDays(d,1)) days.push(d);
+    const labels=days.map(md);
+    const byDay={}; allRows().forEach(r=>{ const x=byDay[r.d]||(byDay[r.d]={sp:0,im:0,cl:0,od:0,sl:0,no:0,dpv:0}); x.sp+=r.sp; x.im+=r.im; x.cl+=r.cl; x.od+=r.od; x.sl+=r.sl; x.no+=r.no; x.dpv+=r.dpv; });
+    combo($("#dailyChart"),{labels,
+      bars:days.map(d=>byDay[d]?byDay[d].sp:null), barEst:days.map(d=>d===D.partial_date),
+      line:days.map(d=>byDay[d]?byDay[d].sl:null),
+      barFmt:yen, lineFmt:yen, barName:"費用", lineName:"売上"});
+
+    // campaign trend
+    const m=METRICS[st.metric];
+    const series=keys().map(k=>{ const per={}; rowsOf(k).forEach(r=>per[r.d]=r);
+      const vals=[], est=[];
+      days.forEach(d=>{ const r=per[d]; if(!r){ vals.push(null); est.push(false); return; }
+        let v; if(st.metric==="roas") v=r.sp?r.sl/r.sp:null; else v=r[st.metric];
+        vals.push(v); est.push(d===D.partial_date); });
+      return {name:label(k),color:COLORS[k],vals,est}; });
+    $("#campLegend").innerHTML=series.map(s=>`<span><i class="ln" style="background:${s.color}"></i>${s.name}</span>`).join("")+(D.partial_date?`<span><i class="ring"></i>白抜き＝途中の日</span>`:"");
+    lineChart($("#campTrend"),{labels,series,fmt:m.fmt,int:m.int});
+
+    // table
+    let h=`<tr><th class="l">日付</th><th>費用</th><th>予算消化率<br>（累計）</th><th>インプレッション</th><th>クリック数</th><th>CTR</th><th>CPC</th><th>注文数</th><th>売上</th><th>ACOS</th><th>ROAS</th></tr>`;
+    let T={sp:0,im:0,cl:0,od:0,sl:0};
+    days.slice().reverse().forEach(d=>{ const x=byDay[d]; if(!x) return; T.sp+=x.sp; T.im+=x.im; T.cl+=x.cl; T.od+=x.od; T.sl+=x.sl;
+      const b=d===D.partial_date?'<span class="badge b-part">途中</span>':'';
+      h+=`<tr><td class="l">${md(d)}${b}</td><td>${yen(x.sp)}</td><td>${num(x.im)}</td><td>${num(x.cl)}</td><td>${pct(ctr(x),2)}</td><td>${yen(cpc(x))}</td><td>${num(x.od)}</td><td>${yen(x.sl)}</td><td>${pct(acos(x))}</td><td>${x2(roas(x))}</td></tr>`; });
+    h+=`<tr class="tot"><td class="l">合計</td><td>${yen(T.sp)}</td><td>${num(T.im)}</td><td>${num(T.cl)}</td><td>${pct(ctr(T),2)}</td><td>${yen(cpc(T))}</td><td>${num(T.od)}</td><td>${yen(T.sl)}</td><td>${pct(acos(T))}</td><td>${x2(roas(T))}</td></tr>`;
+    $("#dailyTable").innerHTML=h;
+    $("#dailyNotes").innerHTML=[
+      "グレーの棒・「途中」は、当日分で、数字がまだ確定していない日です。",
+      "注文数が少ないため、日ごとのROAS・ACOSは大きく変動します。",
+      "SBの売上は14日、SPは7日の帰属期間で、後から増えることがあります。"
+    ].map(t=>`<li>${t}</li>`).join("");
+  }
+
+  // ---------- Terms / keywords ----------
+  function renderTerms(){
+    const ts=D.searchterms.filter(t=>keys().includes(t.c)).slice().sort((a,b)=>b.sp-a.sp);
+    let h=`<tr><th class="l">キャンペーン</th><th class="l">検索語句</th><th class="l">キーワード</th><th>クリック数</th><th>費用</th><th>注文数</th><th>売上</th><th>ACOS</th><th>ROAS</th></tr>`;
+    ts.forEach(t=>{ const a={sp:t.sp,sl:t.sl};
+      h+=`<tr><td class="l">${camp(t.c).kpi.name}${badge(t.c)}</td><td class="l">${esc(t.t)}${t.od>0?'<span class="badge b-buy">購入あり</span>':''}</td><td class="l">${esc(t.kw)}</td><td>${t.cl==null?"-":num(t.cl)}</td><td>${yen(t.sp)}</td><td>${num(t.od)}</td><td>${yen(t.sl)}</td><td>${t.sl?pct(acos(a)):"-"}</td><td>${t.sp&&t.sl?x2(roas(a)):"-"}</td></tr>`; });
+    const T={sp:sum(ts,t=>t.sp),sl:sum(ts,t=>t.sl)};
+    h+=`<tr class="tot"><td class="l">合計</td><td class="l">${ts.length}語句</td><td></td><td>${num(sum(ts,t=>t.cl))}</td><td>${yen(T.sp)}</td><td>${num(sum(ts,t=>t.od))}</td><td>${yen(T.sl)}</td><td>${T.sl?pct(acos(T)):"-"}</td><td>${T.sp&&T.sl?x2(roas(T)):"-"}</td></tr>`;
+    $("#termTable").innerHTML=h; $("#termNote").textContent="費用の多い順";
+
+    // キーワード別（3キャンペーン共通。クリック・費用・購入・売上）
+    const ks=keys().flatMap(c=>(D.keywords[c]||[]).map(r=>Object.assign({c},r)));
+    const KCOLS=[ // key, ラベル, 左寄せか, 並べ替えの値
+      ["c","キャンペーン",true,r=>CK.indexOf(r.c)],
+      ["kw","キーワード",true,r=>r.kw],
+      ["mt","マッチ",true,r=>r.mt],
+      ["im","インプレッション",false,r=>r.im],
+      ["cl","クリック数",false,r=>r.cl],
+      ["ctr","CTR",false,r=>ctr(r)],
+      ["sp","費用",false,r=>r.sp],
+      ["cpc","CPC",false,r=>r.cl?cpc(r):null],
+      ["od","注文数",false,r=>r.od],
+      ["sl","売上",false,r=>r.sl],
+      ["acos","ACOS",false,r=>r.sl?acos(r):null],
+      ["roas","ROAS",false,r=>r.sp&&r.sl?roas(r):null]
+    ];
+    const sc=KCOLS.find(c=>c[0]===st.kwSort.key)||KCOLS[6], dir=st.kwSort.dir;
+    const tie=(a,b)=>b.sp-a.sp||b.cl-a.cl||b.im-a.im;
+    ks.sort((a,b)=>{ const x=sc[3](a), y=sc[3](b);
+      if(x==null&&y==null) return tie(a,b); if(x==null) return 1; if(y==null) return -1;   // 値なし（-）は、いつも下
+      const c=(typeof x==="string")?x.localeCompare(y,"ja"):x-y; return c? c*dir : tie(a,b); });
+    let k="<tr>"+KCOLS.map(c=>`<th class="sortable${c[2]?' l':''}${c[0]===sc[0]?' on':''}" data-k="${c[0]}" title="クリックで並べ替え">${c[1]}<span class="ar">${c[0]===sc[0]?(dir>0?'▲':'▼'):'↕'}</span></th>`).join("")+"</tr>";
+    ks.forEach(r=>{ k+=`<tr><td class="l">${camp(r.c).kpi.name}${badge(r.c)}</td><td class="l">${esc(r.kw)}${r.od>0?'<span class="badge b-buy">購入あり</span>':''}</td><td class="l">${esc(r.mt)}</td><td>${num(r.im)}</td><td>${num(r.cl)}</td><td>${pct(ctr(r),2)}</td><td>${yen(r.sp)}</td><td>${r.cl?yen(cpc(r)):"-"}</td><td>${num(r.od)}</td><td>${yen(r.sl)}</td><td>${r.sl?pct(acos(r)):"-"}</td><td>${r.sp&&r.sl?x2(roas(r)):"-"}</td></tr>`; });
+    const K=agg(ks.map(r=>({sp:r.sp,im:r.im,cl:r.cl,od:r.od,sl:r.sl,no:0,ns:0,dpv:0})));
+    k+=`<tr class="tot"><td class="l">合計</td><td class="l">${ks.length}キーワード</td><td></td><td>${num(K.im)}</td><td>${num(K.cl)}</td><td>${pct(ctr(K),2)}</td><td>${yen(K.sp)}</td><td>${K.cl?yen(cpc(K)):"-"}</td><td>${num(K.od)}</td><td>${yen(K.sl)}</td><td>${K.sl?pct(acos(K)):"-"}</td><td>${K.sp&&K.sl?x2(roas(K)):"-"}</td></tr>`;
+    $("#kwTable").innerHTML=k; $("#kwNote").textContent="列の見出しをクリックすると並べ替えできます（配信開始からの累計）";
+    const reg=keys().map(c=>`${camp(c).kpi.name} ${num(D.kwcount[c])}件中${num((D.keywords[c]||[]).length)}件`).join("、");
+    $("#kwFoot").innerHTML=`インプレッションか費用があったキーワードだけを載せています（登録数に対する件数：${reg}）。期間の選択には連動しません。<br>キーワード別の数字は、キャンペーン別より反映が遅れるため、インプレッション・費用・クリックが少しずれることがあります（購入・売上は一致）。SBの売上は、同じブランドの他商品の購入も含みます。`;
+  }
+
+  function render(){
+    $("#updated").textContent = "データ最終更新: " + D.updated_at;
+    renderSummary(); renderDaily(); renderTerms();
+  }
+  // events
+  $("#seg").addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return; st.sp=b.dataset.sp; document.querySelectorAll("#seg button").forEach(x=>x.classList.toggle("on",x===b)); setPreset("all"); render(); });
+  $("#tabs").addEventListener("click",e=>{ const b=e.target.closest("button"); if(!b) return; st.tab=b.dataset.tab; document.querySelectorAll("#tabs button").forEach(x=>x.classList.toggle("on",x===b)); document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("on",p.id==="p-"+st.tab)); });
+  $("#preset").addEventListener("change",e=>{ if(e.target.value==="custom"){ st.preset="custom"; } else setPreset(e.target.value); render(); });
+  const onDate=()=>{ const f=$("#from").value,t=$("#to").value; if(f&&t&&f<=t){ st.from=f; st.to=t; st.preset="custom"; $("#preset").value="custom"; render(); } };
+  $("#from").addEventListener("change",onDate); $("#to").addEventListener("change",onDate);
+  $("#reset").addEventListener("click",()=>{ setPreset("all"); render(); });
+  $("#kwTable").addEventListener("click",e=>{ const th=e.target.closest("th.sortable"); if(!th) return; const k=th.dataset.k; const text=["c","kw","mt"].includes(k); st.kwSort = st.kwSort.key===k ? {key:k,dir:-st.kwSort.dir} : {key:k,dir:text?1:-1}; renderTerms(); });
+  $("#metricSel").addEventListener("change",e=>{ st.metric=e.target.value; renderDaily(); });
+  setPreset("all"); render();
+};
+
+// ---- パスワードで復号（PBKDF2 + AES-GCM）。復号できた人にだけデータが渡る ----
+(function(){
+  const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+  async function decrypt(pw){
+    const e = window.DASH_ENC, enc = new TextEncoder();
+    const base = await crypto.subtle.importKey("raw", enc.encode(pw), "PBKDF2", false, ["deriveKey"]);
+    const key = await crypto.subtle.deriveKey({name:"PBKDF2", salt:b64(e.salt), iterations:e.iter, hash:"SHA-256"}, base, {name:"AES-GCM", length:256}, false, ["decrypt"]);
+    const buf = await crypto.subtle.decrypt({name:"AES-GCM", iv:b64(e.iv)}, key, b64(e.ct));
+    return JSON.parse(new TextDecoder().decode(buf));
+  }
+  async function open(pw, silent){
+    const err = document.getElementById("loginErr"), btn = document.getElementById("loginBtn");
+    btn.disabled = true; btn.textContent = "確認中…"; err.textContent = "";
+    try{
+      const data = await decrypt(pw);
+      try{ sessionStorage.setItem("dashPwAmz", pw); }catch(_){}
+      document.getElementById("login").classList.add("hidden");
+      document.getElementById("app").classList.remove("hidden");
+      window.startApp(data);
+    }catch(e){
+      try{ sessionStorage.removeItem("dashPwAmz"); }catch(_){}
+      if(!silent) err.textContent = "パスワードが違います。";
+      btn.disabled = false; btn.textContent = "開く";
+    }
+  }
+  document.getElementById("loginForm").addEventListener("submit", ev => { ev.preventDefault(); open(document.getElementById("pw").value, false); });
+  let saved = null; try{ saved = sessionStorage.getItem("dashPwAmz"); }catch(_){}
+  if(saved) open(saved, true);
+})();
+</script>
+</body>
+</html>
